@@ -52,7 +52,7 @@ namespace unit{
     return *cell;
   }
 
-  void pushback(Matrix &matrix, Unit &cell){
+  void pushBack(Matrix &matrix, Unit &cell){
     Unit *cur = matrix.unit;
     Unit *ptr = nullptr;
     while (cur){
@@ -61,12 +61,14 @@ namespace unit{
     }
     ptr->next = &cell;
   }
+
+  void pushFront(Matrix &matrix, Unit &cell){
+    cell.next = matrix.unit;
+    matrix.unit = &cell;
+  }
 }
 
-void pushfront(Matrix &matrix, Unit &cell){
-  cell.next = matrix.unit;
-  matrix.unit = &cell;
-}
+
 
 namespace matrix{
   
@@ -79,7 +81,30 @@ namespace matrix{
     }
   }
 
-  
+  void outputFull(Matrix matrix){
+    Unit *ptr = matrix.unit;
+    for (int j = 0; j < matrix.size.y; j++){
+      for (int i = 0; i < matrix.size.x; i++){
+        if (j == ptr->point.y && i == ptr->point.x){
+          std::cout << ptr->value << " ";
+          ptr = ptr->next;
+        }
+        else{
+          std::cout << "0 ";
+        }
+      }
+      std::cout << std::endl;
+    }
+  }
+
+  void outputShort(Matrix matrix){
+    Unit *ptr = matrix.unit;
+    while (ptr){ // a : (x,y)
+      std::cout << ptr->value << " : (" << ptr->point.x << "," << ptr->point.y << ")" << std::endl;
+      ptr = ptr->next;
+    }
+  }
+
   
   Matrix input(){
     Matrix matrix;
@@ -94,7 +119,7 @@ namespace matrix{
           val = getNum<int>();
           if (val == 0){ continue; }
           Unit cell = unit::input(val, i, j);
-          
+          unit::pushBack(matrix, cell);
         }
       }
     }
