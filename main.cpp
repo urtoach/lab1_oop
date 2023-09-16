@@ -40,6 +40,31 @@ T getNum(T min = std::numeric_limits<T>::min(),
   }
 }
 
+
+// количество цифр в записи которых превышает среднее количество
+// цифр в записи всех элементов данной строки матрицы
+
+bool compFunc(Matrix &matrix, Unit &unit){
+  int count = 0;
+  double sum = 0;
+  Unit *ptr = matrix.unit;
+  while (ptr && ptr->point.x != unit.point.x){
+    ptr = ptr->next;
+  }
+  if (!ptr){ return false; }
+  while (ptr && ptr->point.x == unit.point.x){
+    count++;
+    sum += (std::ceil(std::log10(ptr->value)));
+  }
+  if (std::round(sum/count) < std::ceil(std::log10(unit.value))){
+    return true;
+  }
+  else{
+    return 0;
+  }
+}
+
+
 namespace matrix {
   namespace unit {
 
@@ -92,14 +117,14 @@ namespace matrix {
   }
 
   Matrix input() {
-    Matrix matrix;
+    Matrix *matrix = new Matrix;
     try {
-      std::cout << "enter number of columns:" << std::endl; // m: y, j
-      matrix.size.y = getNum<int>();
       std::cout << "enter number of rows:" << std::endl; // n: x, i
-      matrix.size.x = getNum<int>();
-      for (int i = 0; i < matrix.size.x; i++) {
-        for (int j = 0; j < matrix.size.y; j++) {
+      matrix->size.x = getNum<int>();
+      std::cout << "enter number of columns:" << std::endl; // m: y, j
+      matrix->size.y = getNum<int>();
+      for (int i = 0; i < matrix->size.x; i++) {
+        for (int j = 0; j < matrix->size.y; j++) {
           int val;
           val = getNum<int>();
           if (val == 0) {
@@ -107,38 +132,54 @@ namespace matrix {
           }
           Unit *cell = new Unit; //???????
           *cell = {val, {i, j}}; 
-          unit::pushBack(matrix, *cell);
+          unit::pushBack(*matrix, *cell);
         }
       }
     } catch (...) {
-      erase(matrix);
+      erase(*matrix);
     }
-    return matrix;
+    return *matrix;
   }
 
+  void checkCoord(Matrix &matrix){
+    Unit *ptr = matrix.unit;
+    int count = 0;
+    int checker = 0;
+    while (ptr){
+      if (ptr->point.x == checker){
+        ptr->point.y = count;
+        count++;
+        ptr = ptr->next;
+      }
+      else{
+        count = 0;
+        checker++;
+      }
+      if (checker > matrix.size.x){ break; }
+    }
+  }
+  
+  Matrix newMatrix(Matrix &init_matrix, bool (*callback(Matrix&, Unit&))){
+    Matrix *new_matrix = new Matrix;
+    new_matrix->size.x = init_matrix.size.x;
+    Unit *ptr = init_matrix.unit;
+    while (ptr){
+      if (callback(init_matrix, *ptr)){
+        unit::pushBack(init_matrix, *ptr);
+      }
+      ptr = ptr->next;
+    }
+    checkCoord(*new_matrix);
+  }
+  
 } // namespace matrix
 
-// количество цифр в записи которых превышает среднее количество
-// цифр в записи всех элементов данной строки матрицы
 
-bool compFunc(Matrix &matrix, Unit &unit){
-  int count = 0;
-  double sum = 0;
-  Unit *ptr = matrix.unit;
-  while (ptr && ptr->point.x != unit.point.x){
-    ptr = ptr->next;
-  }
-  if (!ptr){ return false; }
-  while (ptr && ptr->point.x == unit.point.x){
-    count++;
-    sum += (std::ceil(std::log10(ptr->value)));
-  }
-  if (std::round(sum/count) < std::ceil(std::log10(unit.value))){
-    return true;
-  }
-  else{
-    return 0;
-  }
+
+
+int main() {
+  Matrix matrix = matrix::input();
+  std::cout << "vrode vse ok" << std::endl;
+  matrix::erase(matrix);
+  std::cout << "vrode udalilos'" << std::endl;
 }
-
-int main() {}
