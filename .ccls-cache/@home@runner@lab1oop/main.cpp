@@ -1,95 +1,81 @@
+#include <cstring>
 #include <iostream>
 #include <limits>
 #include <string>
-#include <cstring>
+#include <cmath>
 
-struct Coordinates{
+struct Coordinates {
   int x, y;
 };
 
-struct Unit{
+struct Unit {
   int value;
   Coordinates point;
   Unit *next = nullptr;
 };
 
-struct Matrix{
+struct Matrix {
   Coordinates size;
   Unit *unit = nullptr;
 };
 
 template <class T>
 
-T getNum(T min = std::numeric_limits<T>::min(), T max = std::numeric_limits<T>::max()){
+T getNum(T min = std::numeric_limits<T>::min(),
+         T max = std::numeric_limits<T>::max()) {
   T val;
-  while(true){
+  while (true) {
     std::cin >> val;
-    if (std::cin.eof()){
+    if (std::cin.eof()) {
       throw std::runtime_error("find eof");
-    }
-    else if (std::cin.bad()){
+    } else if (std::cin.bad()) {
       throw std::runtime_error(std::string("failed to read number: ") + strerror(errno));
-    }
-    else if (std::cin.fail()){
+    } else if (std::cin.fail()) {
       std::cin.clear();
       std::cin.ignore();
       std::cout << "error. repeat, please" << std::endl;
-    }
-    else if (val >= min && val <= max){
+    } else if (val >= min && val <= max) {
       return val;
     }
   }
-  
 }
 
-namespace unit{
+namespace matrix {
+  namespace unit {
 
-  Unit input(int val, int x, int y){
-    Unit *cell = new Unit;
-    cell->value = val;
-    cell->point.x = x;
-    cell->point.y = y;
-    return *cell;
-  }
-
-  void pushBack(Matrix &matrix, Unit &cell){
-    Unit *cur = matrix.unit;
-    Unit *ptr = nullptr;
-    while (cur){
-      ptr = cur;
-      cur = cur->next;
+    void pushBack(Matrix &matrix, Unit &cell) {
+      Unit *cur = matrix.unit;
+      Unit *ptr = nullptr;
+      while (cur) {
+        ptr = cur;
+        cur = cur->next;
+      }
+      ptr->next = &cell;
     }
-    ptr->next = &cell;
-  }
 
-  void pushFront(Matrix &matrix, Unit &cell){
-    cell.next = matrix.unit;
-    matrix.unit = &cell;
-  }
-}
+    void pushFront(Matrix &matrix, Unit &cell) {
+      cell.next = matrix.unit;
+      matrix.unit = &cell;
+    }
+  } // namespace unit
 
-
-
-namespace matrix{
-  
-  void erase(Matrix &matrix){
+  void erase(Matrix &matrix) {
     Unit *ptr = matrix.unit;
-    while (ptr){
+    while (ptr) {
       Unit *del_ptr = ptr;
       delete del_ptr;
       ptr = ptr->next;
     }
   }
 
-  void outputFull(Matrix matrix){
+  void outputFull(Matrix matrix) {
     Unit *ptr = matrix.unit;
-    for (int j = 0; j < matrix.size.y; j++){
-      for (int i = 0; i < matrix.size.x; i++){
-        if (j == ptr->point.y && i == ptr->point.x){
+    for (int i = 0; i < matrix.size.x; i++) {
+      for (int j = 0; j < matrix.size.y; j++) {
+        if (j == ptr->point.y && i == ptr->point.x) {
           std::cout << ptr->value << " ";
           ptr = ptr->next;
-        }
-        else{
+        } else {
           std::cout << "0 ";
         }
       }
@@ -97,39 +83,62 @@ namespace matrix{
     }
   }
 
-  void outputShort(Matrix matrix){
+  void outputShort(Matrix matrix) {
     Unit *ptr = matrix.unit;
-    while (ptr){ // a : (x,y)
+    while (ptr) { // a : (x,y)
       std::cout << ptr->value << " : (" << ptr->point.x << "," << ptr->point.y << ")" << std::endl;
       ptr = ptr->next;
     }
   }
 
-  
-  Matrix input(){
+  Matrix input() {
     Matrix matrix;
-    try{
-      std::cout << "enter number of columns:" << std::endl; //m: y, j
+    try {
+      std::cout << "enter number of columns:" << std::endl; // m: y, j
       matrix.size.y = getNum<int>();
-      std::cout << "enter number of rows:" << std::endl; //n: x, i
+      std::cout << "enter number of rows:" << std::endl; // n: x, i
       matrix.size.x = getNum<int>();
-      for (int j = 0; j < matrix.size.y; j++){
-        for (int i = 0; i < matrix.size.x; i++){
+      for (int i = 0; i < matrix.size.x; i++) {
+        for (int j = 0; j < matrix.size.y; j++) {
           int val;
           val = getNum<int>();
-          if (val == 0){ continue; }
-          Unit cell = unit::input(val, i, j);
-          unit::pushBack(matrix, cell);
+          if (val == 0) {
+            continue;
+          }
+          Unit *cell = new Unit; //???????
+          *cell = {val, {i, j}}; 
+          unit::pushBack(matrix, *cell);
         }
       }
-    }
-    catch(...){
+    } catch (...) {
       erase(matrix);
     }
     return matrix;
   }
-  
+
+} // namespace matrix
+
+// количество цифр в записи которых превышает среднее количество
+// цифр в записи всех элементов данной строки матрицы
+
+bool compFunc(Matrix &matrix, Unit &unit){
+  int count = 0;
+  double sum = 0;
+  Unit *ptr = matrix.unit;
+  while (ptr && ptr->point.x != unit.point.x){
+    ptr = ptr->next;
+  }
+  if (!ptr){ return false; }
+  while (ptr && ptr->point.x == unit.point.x){
+    count++;
+    sum += (std::ceil(std::log10(ptr->value)));
+  }
+  if (std::round(sum/count) < std::ceil(std::log10(unit.value))){
+    return true;
+  }
+  else{
+    return 0;
+  }
 }
-int main(){
-  
-}
+
+int main() {}
