@@ -21,8 +21,7 @@ struct Matrix {
 
 template <class T>
 
-T getNum(T min = std::numeric_limits<T>::min(),
-         T max = std::numeric_limits<T>::max()) {
+T getNum(T min = std::numeric_limits<T>::min(), T max = std::numeric_limits<T>::max()) {
   T val;
   while (true) {
     std::cin >> val;
@@ -70,12 +69,13 @@ namespace matrix {
 
     void pushBack(Matrix &matrix, Unit &cell) {
       Unit *cur = matrix.unit;
-      Unit *ptr = nullptr;
+      Unit *prev = cur;
       while (cur) {
-        ptr = cur;
+        prev = cur;
         cur = cur->next;
       }
-      ptr->next = &cell;
+      if (prev == nullptr){ matrix.unit = &cell; }
+      else{ prev->next = &cell; }
     }
 
     void pushFront(Matrix &matrix, Unit &cell) {
@@ -91,6 +91,7 @@ namespace matrix {
       delete del_ptr;
       ptr = ptr->next;
     }
+    delete &matrix;
   }
 
   void outputFull(Matrix matrix) {
@@ -109,7 +110,9 @@ namespace matrix {
   }
 
   void outputShort(Matrix matrix) {
+    std::cout << "short output:" << std::endl;
     Unit *ptr = matrix.unit;
+    std::cout << "  size (mxn): " << matrix.size.x << "x" << matrix.size.y << std::endl;
     while (ptr) { // a : (x,y)
       std::cout << ptr->value << " : (" << ptr->point.x << "," << ptr->point.y << ")" << std::endl;
       ptr = ptr->next;
@@ -126,10 +129,13 @@ namespace matrix {
       for (int i = 0; i < matrix->size.x; i++) {
         for (int j = 0; j < matrix->size.y; j++) {
           int val;
+          std::cout << "enter num:" << std::endl;
           val = getNum<int>();
           if (val == 0) {
             continue;
           }
+          //break;
+          
           Unit *cell = new Unit; //???????
           *cell = {val, {i, j}}; 
           unit::pushBack(*matrix, *cell);
@@ -170,6 +176,7 @@ namespace matrix {
       ptr = ptr->next;
     }
     checkCoord(*new_matrix);
+    return *new_matrix;
   }
   
 } // namespace matrix
@@ -180,6 +187,7 @@ namespace matrix {
 int main() {
   Matrix matrix = matrix::input();
   std::cout << "vrode vse ok" << std::endl;
+  matrix::outputShort(matrix);
   matrix::erase(matrix);
   std::cout << "vrode udalilos'" << std::endl;
 }
