@@ -85,23 +85,63 @@ namespace matrix {
   } // namespace unit
 
   void erase(Matrix &matrix) {
-    Unit *ptr = matrix.unit;
-    while (ptr) {
-      Unit *del_ptr = ptr;
-      delete del_ptr;
-      ptr = ptr->next;
+    try {
+      Unit *ptr = matrix.unit;
+      while (ptr) {
+        Unit *del_ptr = ptr;
+        ptr = ptr->next;
+        delete del_ptr;
+      }
     }
-    delete &matrix;
+    catch(...){
+      std::cout << "wataheeeeeeeeell" << std::endl;
+    }
+    //delete &matrix;
   }
 
-  void outputFull(Matrix matrix) {
+  /*void outputFull(Matrix matrix) {
+    std::cout << "full output:" << std::endl;
     Unit *ptr = matrix.unit;
-    for (int i = 0; i < matrix.size.x; i++) {
-      for (int j = 0; j < matrix.size.y; j++) {
-        if (j == ptr->point.y && i == ptr->point.x) {
+    try{
+      for (int i = 0; i < matrix.size.x; i++){
+        for (int j = 0; j < matrix.size.y; j++){
+          if (!ptr){ throw; }
+          if (i == ptr->point.x && j == ptr->point.y){
+            std::cout << ptr->value << " ";
+            ptr = ptr->next;
+          }
+          else{
+            std::cout << "0 ";
+          }
+          std::cout << std::endl;
+        }
+      }
+    }
+    catch(...){
+      std::cout << "blya" << std::endl;
+    }
+  }*/
+
+  Unit *isExist(Matrix matrix, int x, int y){
+    Unit *ptr = matrix.unit;
+    while (ptr){
+      if (ptr->point.x == x && ptr->point.y == y){
+        return ptr;
+      }
+      ptr = ptr->next;
+    }
+    return nullptr;
+  }
+  
+  void outputFull(Matrix matrix){
+    std::cout << "full output:" << std::endl;
+    for (int i = 0; i < matrix.size.x; i++){
+      for (int j = 0; j < matrix.size.y; j++){
+        Unit *ptr = isExist(matrix, i, j);
+        if (ptr){
           std::cout << ptr->value << " ";
-          ptr = ptr->next;
-        } else {
+        }
+        else{
           std::cout << "0 ";
         }
       }
@@ -113,21 +153,21 @@ namespace matrix {
     std::cout << "short output:" << std::endl;
     Unit *ptr = matrix.unit;
     std::cout << "  size (mxn): " << matrix.size.x << "x" << matrix.size.y << std::endl;
-    while (ptr) { // a : (x,y)
-      std::cout << ptr->value << " : (" << ptr->point.x << "," << ptr->point.y << ")" << std::endl;
+    while (ptr) { // a: (x,y)
+      std::cout << "  " << ptr->value << ": (" << ptr->point.x << "," << ptr->point.y << ")" << std::endl;
       ptr = ptr->next;
     }
   }
 
   Matrix input() {
-    Matrix *matrix = new Matrix;
+    Matrix matrix;// = new Matrix;
     try {
       std::cout << "enter number of rows:" << std::endl; // n: x, i
-      matrix->size.x = getNum<int>();
+      matrix.size.x = getNum<int>();
       std::cout << "enter number of columns:" << std::endl; // m: y, j
-      matrix->size.y = getNum<int>();
-      for (int i = 0; i < matrix->size.x; i++) {
-        for (int j = 0; j < matrix->size.y; j++) {
+      matrix.size.y = getNum<int>();
+      for (int i = 0; i < matrix.size.x; i++) {
+        for (int j = 0; j < matrix.size.y; j++) {
           int val;
           std::cout << "enter num:" << std::endl;
           val = getNum<int>();
@@ -138,13 +178,13 @@ namespace matrix {
           
           Unit *cell = new Unit; //???????
           *cell = {val, {i, j}}; 
-          unit::pushBack(*matrix, *cell);
+          unit::pushBack(matrix, *cell);
         }
       }
     } catch (...) {
-      erase(*matrix);
+      erase(matrix);
     }
-    return *matrix;
+    return matrix;
   }
 
   void checkCoord(Matrix &matrix){
@@ -188,6 +228,8 @@ int main() {
   Matrix matrix = matrix::input();
   std::cout << "vrode vse ok" << std::endl;
   matrix::outputShort(matrix);
+  std::cout << "==============" << std::endl;
+  matrix::outputFull(matrix);
   matrix::erase(matrix);
   std::cout << "vrode udalilos'" << std::endl;
 }
