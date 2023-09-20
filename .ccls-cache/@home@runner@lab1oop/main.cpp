@@ -47,15 +47,18 @@ bool compFunc(Matrix &matrix, Unit &unit){
   int count = 0;
   double sum = 0;
   Unit *ptr = matrix.unit;
+  if (!ptr){ return false; }
   while (ptr && ptr->point.x != unit.point.x){
-    ptr = ptr->next;
+    ptr = ptr->next; 
   }
   if (!ptr){ return false; }
   while (ptr && ptr->point.x == unit.point.x){
     count++;
     sum += (std::ceil(std::log10(ptr->value)));
+    ptr = ptr->next;
   }
-  if (std::round(sum/count) < std::ceil(std::log10(unit.value))){
+  sum += (matrix.size.x - count);
+  if (std::round(sum/matrix.size.x) < std::ceil(std::log10(unit.value + 1))){
     return true;
   }
   else{
@@ -67,15 +70,17 @@ bool compFunc(Matrix &matrix, Unit &unit){
 namespace matrix {
   namespace unit {
 
-    void pushBack(Matrix &matrix, Unit &cell) {
-      Unit *cur = matrix.unit;
-      Unit *prev = cur;
-      while (cur) {
-        prev = cur;
-        cur = cur->next;
+    void pushBack(Matrix &matrix, Unit *cell) {
+      if (matrix.unit == nullptr) {
+        matrix.unit = cell;
+      } 
+      else {
+        Unit *cur = matrix.unit;
+        while (cur->next) {
+          cur = cur->next;
+        }
+        cur->next = cell;
       }
-      if (prev == nullptr){ matrix.unit = &cell; }
-      else{ prev->next = &cell; }
     }
 
     void pushFront(Matrix &matrix, Unit &cell) {
@@ -85,42 +90,15 @@ namespace matrix {
   } // namespace unit
 
   void erase(Matrix &matrix) {
-    try {
       Unit *ptr = matrix.unit;
       while (ptr) {
         Unit *del_ptr = ptr;
         ptr = ptr->next;
         delete del_ptr;
       }
-    }
-    catch(...){
-      std::cout << "wataheeeeeeeeell" << std::endl;
-    }
-    //delete &matrix;
+      //if (!matrix.unit) { delete matrix.unit; }
+      matrix.unit = nullptr;
   }
-
-  /*void outputFull(Matrix matrix) {
-    std::cout << "full output:" << std::endl;
-    Unit *ptr = matrix.unit;
-    try{
-      for (int i = 0; i < matrix.size.x; i++){
-        for (int j = 0; j < matrix.size.y; j++){
-          if (!ptr){ throw; }
-          if (i == ptr->point.x && j == ptr->point.y){
-            std::cout << ptr->value << " ";
-            ptr = ptr->next;
-          }
-          else{
-            std::cout << "0 ";
-          }
-          std::cout << std::endl;
-        }
-      }
-    }
-    catch(...){
-      std::cout << "blya" << std::endl;
-    }
-  }*/
 
   Unit *isExist(Matrix matrix, int x, int y){
     Unit *ptr = matrix.unit;
@@ -151,21 +129,27 @@ namespace matrix {
 
   void outputShort(Matrix matrix) {
     std::cout << "short output:" << std::endl;
+    if (matrix.unit == nullptr){ 
+      std::cout << "ur table table consists entirely of zeros" << std::endl;
+      return;
+    }
     Unit *ptr = matrix.unit;
     std::cout << "  size (mxn): " << matrix.size.x << "x" << matrix.size.y << std::endl;
-    while (ptr) { // a: (x,y)
+    while (ptr) { 
       std::cout << "  " << ptr->value << ": (" << ptr->point.x << "," << ptr->point.y << ")" << std::endl;
       ptr = ptr->next;
     }
   }
 
   Matrix input() {
-    Matrix matrix;// = new Matrix;
+    Matrix matrix;
     try {
-      std::cout << "enter number of rows:" << std::endl; // n: x, i
+      std::cout << "enter number of rows:" << std::endl;
       matrix.size.x = getNum<int>();
-      std::cout << "enter number of columns:" << std::endl; // m: y, j
+      if (matrix.size.x <= 0){ throw 0; }
+      std::cout << "enter number of columns:" << std::endl;
       matrix.size.y = getNum<int>();
+      if (matrix.size.y <= 0){ throw 0; }
       for (int i = 0; i < matrix.size.x; i++) {
         for (int j = 0; j < matrix.size.y; j++) {
           int val;
@@ -174,15 +158,18 @@ namespace matrix {
           if (val == 0) {
             continue;
           }
-          //break;
-          
-          Unit *cell = new Unit; //???????
-          *cell = {val, {i, j}}; 
-          unit::pushBack(matrix, *cell);
+          Unit *cell = new Unit;
+          *cell = {val, {i, j}, nullptr}; 
+          unit::pushBack(matrix, cell);
         }
       }
-    } catch (...) {
+    }
+    catch(int){
+      std::cout << "it seems like the table dimensions should be positive" << std::endl;
+    }
+    catch (...) {
       erase(matrix);
+      throw;
     }
     return matrix;
   }
@@ -203,20 +190,31 @@ namespace matrix {
       }
       if (checker > matrix.size.x){ break; }
     }
-  }
-  
-  Matrix newMatrix(Matrix &init_matrix, bool (*callback(Matrix&, Unit&))){
-    Matrix *new_matrix = new Matrix;
-    new_matrix->size.x = init_matrix.size.x;
-    Unit *ptr = init_matrix.unit;
-    while (ptr){
-      if (callback(init_matrix, *ptr)){
-        unit::pushBack(init_matrix, *ptr);
+    int max = 1;
+    ptr = matrix.unit;
+    while(ptr){
+      if (ptr->point.y + 1 > max){
+        max = ptr->point.y + 1;
       }
       ptr = ptr->next;
     }
-    checkCoord(*new_matrix);
-    return *new_matrix;
+    matrix.size.y = max;
+  }
+  
+  Matrix newMatrix(Matrix &init_matrix, bool (callback(Matrix&, Unit&))){
+    Matrix new_matrix;
+    new_matrix.size.x = init_matrix.size.x;
+    Unit *ptr = init_matrix.unit;
+    while (ptr){
+      if (callback(init_matrix, *ptr)){
+        Unit *cell = new Unit;
+        *cell = {ptr->value, {ptr->point.x, ptr->point.y}, nullptr};
+        unit::pushBack(new_matrix, cell);
+      }
+      ptr = ptr->next;
+    }
+    checkCoord(new_matrix);
+    return new_matrix;
   }
   
 } // namespace matrix
@@ -226,10 +224,13 @@ namespace matrix {
 
 int main() {
   Matrix matrix = matrix::input();
-  std::cout << "vrode vse ok" << std::endl;
   matrix::outputShort(matrix);
-  std::cout << "==============" << std::endl;
+  std::cout << "====================" << std::endl;
   matrix::outputFull(matrix);
+  Matrix new_matrix = matrix::newMatrix(matrix, compFunc);
+  std::cout << "====================" << std::endl;
+  matrix::outputShort(new_matrix);
   matrix::erase(matrix);
-  std::cout << "vrode udalilos'" << std::endl;
+  matrix::erase(new_matrix);
+  //delete &matrix;
 }
