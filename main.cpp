@@ -26,15 +26,25 @@ T getNum(T min = std::numeric_limits<T>::min(), T max = std::numeric_limits<T>::
   while (true) {
     std::cin >> val;
     if (std::cin.eof()) {
+      //throw std::runtime_error("find eof");
+      //std::cout << "find eof" << std::endl;
       throw std::runtime_error("find eof");
-    } else if (std::cin.bad()) {
+    } 
+    else if (std::cin.bad()) {
       throw std::runtime_error(std::string("failed to read number: ") + strerror(errno));
-    } else if (std::cin.fail()) {
+    } 
+    else if (std::cin.fail()) {
       std::cin.clear();
       std::cin.ignore();
       std::cout << "error. repeat, please" << std::endl;
-    } else if (val >= min && val <= max) {
+    } 
+    else if (val >= min && val <= max) {
       return val;
+    }
+    else{
+      std::cin.clear();
+      std::cin.ignore();
+      std::cout << "error. repeat, please" << std::endl;
     }
   }
 }
@@ -125,6 +135,10 @@ namespace matrix {
   }
   
   void outputFull(Matrix matrix){
+    if (matrix.unit == nullptr && (matrix.size.x == 0 || matrix.size.y == 0)){
+      std::cout << "there is no matrix" << std::endl;
+      return;
+    }
     std::cout << "full output:" << std::endl;
     try {
       for (int i = 0; i < matrix.size.x; i++){
@@ -149,10 +163,14 @@ namespace matrix {
   }
 
   void outputShort(Matrix matrix) {
+    if (matrix.unit == nullptr && (matrix.size.x == 0 || matrix.size.y == 0)){
+      std::cout << "there is no matrix" << std::endl;
+      return;
+    }
     std::cout << "short output:" << std::endl;
     try {
       if (matrix.unit == nullptr){ 
-        std::cout << "ur table table consists entirely of zeros" << std::endl;
+        std::cout << "there is no matrix/the matrix is filled with zeros" << std::endl;
         return;
       }
       Unit *ptr = matrix.unit;
@@ -163,7 +181,7 @@ namespace matrix {
       }
     }
     catch (const std::exception &e) {
-      std::cerr << "Error: " << e.what() << std::endl;
+      std::cerr << "error: " << e.what() << std::endl;
     }
   }
 
@@ -171,9 +189,9 @@ namespace matrix {
     Matrix matrix;
     try {
       std::cout << "enter number of rows:" << std::endl;
-      matrix.size.x = getNum<int>(0);
+      matrix.size.x = getNum<int>(1);
       std::cout << "enter number of columns:" << std::endl;
-      matrix.size.y = getNum<int>(0);
+      matrix.size.y = getNum<int>(1);
       for (int i = 0; i < matrix.size.x; i++) {
         for (int j = 0; j < matrix.size.y; j++) {
           int val;
@@ -254,18 +272,50 @@ namespace matrix {
   
 } // namespace matrix
 
-
-
+int menu(){
+  int n;
+  std::cout << "---------------------------------------" << std::endl;
+  std::cout << "0. complete the program" << std::endl;
+  std::cout << "1. enter new matrix" << std::endl;
+  std::cout << "2. briefly display the matrix" << std::endl;
+  std::cout << "3. fully display matrix" << std::endl;
+  std::cout << "4. form a new matrix with 1st function" << std::endl;
+  std::cout << "5. form a new matrix with 2nd function" << std::endl;
+  std::cout << "---------------------------------------" << std::endl << std::endl;
+  n = getNum(0, 5);
+  return n;
+}
 
 int main() {
-  Matrix matrix = matrix::input();
-  matrix::outputShort(matrix);
-  std::cout << "====================" << std::endl;
-  matrix::outputFull(matrix);
-  Matrix new_matrix = matrix::newMatrix(matrix, compFunc);
-  std::cout << "====================" << std::endl;
-  matrix::outputShort(new_matrix);
-  matrix::erase(matrix);
-  matrix::erase(new_matrix);
-  //delete &matrix;
+  Matrix matrix;
+  Matrix new_matrix;
+  while (true){
+    switch(menu()){
+      case 0:
+        std::cout << "ok, bue" <<std::endl;
+        matrix::erase(matrix);
+        matrix::erase(new_matrix);
+        return 0;
+      case 1:
+        matrix::erase(matrix);
+        matrix = matrix::input();
+        break;
+      case 2:
+        matrix::outputShort(matrix);
+        break;
+      case 3:
+        matrix::outputFull(matrix);
+        break;
+      case 4:
+        std::cout << "the function forms a new matrix by placing in its i-th row those elements from the i-th row of the original matrix whose entry exceeds the average number digits in the record of all elements of a given row of the matrix)" << std::endl;
+        matrix::newMatrix(matrix, compFunc);
+        break;
+      case 5:
+        std::cout << "the second function was not invented(((" << std::endl;
+        break;
+      default:
+        std::cout << "something error" << std::endl;
+        break;
+    }
+  }
 }
