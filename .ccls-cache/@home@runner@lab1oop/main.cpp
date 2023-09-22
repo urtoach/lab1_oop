@@ -16,7 +16,8 @@ struct Unit {
 
 struct Matrix {
   Coordinates size;
-  Unit *unit = nullptr;
+  Unit *head = nullptr;
+  Unit *tail = nullptr;
 };
 
 template <class T>
@@ -54,7 +55,7 @@ T getNum(T min = std::numeric_limits<T>::min(), T max = std::numeric_limits<T>::
 bool compFunc(Matrix &matrix, Unit &unit){
   int count = 0;
   double sum = 0;
-  Unit *ptr = matrix.unit;
+  Unit *ptr = matrix.head;
   if (!ptr){ return false; }
   while (ptr && ptr->point.x != unit.point.x){
     ptr = ptr->next; 
@@ -62,7 +63,7 @@ bool compFunc(Matrix &matrix, Unit &unit){
   if (!ptr){ return false; }
   while (ptr && ptr->point.x == unit.point.x){
     count++;
-    sum += (std::ceil(std::log10(ptr->value)));
+    sum += (std::ceil(std::log10(ptr->value + 1)));
     ptr = ptr->next;
   }
   sum += (matrix.size.x - count);
@@ -79,45 +80,42 @@ namespace matrix {
   namespace unit {
 
     void pushBack(Matrix &matrix, Unit *cell) {
-      try{
-        if (matrix.unit == nullptr) {
-          matrix.unit = cell;
+      try {
+        if (matrix.head == nullptr) {
+          matrix.head = cell;
+          matrix.tail = cell;
         } 
         else {
-          Unit *cur = matrix.unit;
-          while (cur->next) {
-            cur = cur->next;
-          }
-          cur->next = cell;
+          matrix.tail->next = cell;
+          matrix.tail = cell;
         }
-      }
+      } 
       catch (const std::exception &e) {
-        std::cerr << "error in push back: " << e.what() << std::endl;
+        std::cerr << "error in pushBack: " << e.what() << std::endl;
         throw;
       }
     }
-  } // namespace unit
-
+  }
   void erase(Matrix &matrix) {
     try {
-      Unit *ptr = matrix.unit;
+      Unit *ptr = matrix.head;
       while (ptr) {
         Unit *del_ptr = ptr;
         ptr = ptr->next;
         delete del_ptr;
       }
       //if (!matrix.unit) { delete matrix.unit; }
-      matrix.unit = nullptr;
+      matrix.head = nullptr;
     }
     catch (...) {
-      matrix.unit = nullptr;
+      matrix.head = nullptr;
       throw;
     }
   }
 
   Unit *isExist(Matrix matrix, int x, int y){
     try {
-      Unit *ptr = matrix.unit;
+      Unit *ptr = matrix.head;
       while (ptr){
         if (ptr->point.x == x && ptr->point.y == y){
           return ptr;
@@ -133,7 +131,7 @@ namespace matrix {
   }
   
   void outputFull(Matrix matrix){
-    if (matrix.unit == nullptr && (matrix.size.x == 0 || matrix.size.y == 0)){
+    if (matrix.head == nullptr && (matrix.size.x == 0 || matrix.size.y == 0)){
       std::cout << "there is no matrix" << std::endl;
       return;
     }
@@ -161,17 +159,17 @@ namespace matrix {
   }
 
   void outputShort(Matrix matrix) {
-    if (matrix.unit == nullptr && (matrix.size.x == 0 || matrix.size.y == 0)){
+    if (matrix.head == nullptr && (matrix.size.x == 0 || matrix.size.y == 0)){
       std::cout << "there is no matrix" << std::endl;
       return;
     }
     std::cout << "short output:" << std::endl;
     try {
-      if (matrix.unit == nullptr){ 
+      if (matrix.head == nullptr){ 
         std::cout << "there is no matrix/the matrix is filled with zeros" << std::endl;
         return;
       }
-      Unit *ptr = matrix.unit;
+      Unit *ptr = matrix.head;
       std::cout << "  size (mxn): " << matrix.size.x << "x" << matrix.size.y << std::endl;
       while (ptr) { 
         std::cout << "  " << ptr->value << ": (" << ptr->point.x << "," << ptr->point.y << ")" << std::endl;
@@ -213,7 +211,7 @@ namespace matrix {
 
   void checkCoord(Matrix &matrix){
     try {
-      Unit *ptr = matrix.unit;
+      Unit *ptr = matrix.head;
       int count = 0;
       int checker = 0;
       while (ptr){
@@ -229,7 +227,7 @@ namespace matrix {
         if (checker > matrix.size.x){ break; }
       }
       int max = 1;
-      ptr = matrix.unit;
+      ptr = matrix.head;
       while(ptr){
         if (ptr->point.y + 1 > max){
           max = ptr->point.y + 1;
@@ -238,16 +236,16 @@ namespace matrix {
       }
       matrix.size.y = max;
     }
-    catch (const std::out_of_range &e) {
-      std::cerr << "error: " << e.what() << std::endl;
+    catch (...) {
+      std::cerr << "error" << std::endl;
     }
   }
   
   Matrix newMatrix(Matrix &init_matrix, bool (callback(Matrix&, Unit&))){
     Matrix new_matrix;
-    new_matrix.size.x = init_matrix.size.x;
+    new_matrix.size = init_matrix.size;
     try {
-      Unit *ptr = init_matrix.unit;
+      Unit *ptr = init_matrix.head;
       while (ptr){
         if (callback(init_matrix, *ptr)){
           Unit *cell = new Unit;
@@ -256,7 +254,7 @@ namespace matrix {
         }
         ptr = ptr->next;
       }
-      checkCoord(new_matrix);
+      //checkCoord(new_matrix);
     }
     catch (...) {
       erase(new_matrix);
@@ -266,20 +264,6 @@ namespace matrix {
   }
   
 } // namespace matrix
-
-/*int menu(){
-  int n;
-  std::cout << "---------------------------------------" << std::endl;
-  std::cout << "0. complete the program" << std::endl;
-  std::cout << "1. enter new matrix" << std::endl;
-  std::cout << "2. briefly display the matrix" << std::endl;
-  std::cout << "3. fully display matrix" << std::endl;
-  std::cout << "4. form a new matrix with 1st function" << std::endl;
-  std::cout << "5. form a new matrix with 2nd function" << std::endl;
-  std::cout << "---------------------------------------" << std::endl << std::endl;
-  n = getNum(0, 5);
-  return n;
-}*/
 
 int main() {
   Matrix matrix;
