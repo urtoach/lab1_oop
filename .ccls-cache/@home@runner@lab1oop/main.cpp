@@ -26,8 +26,6 @@ T getNum(T min = std::numeric_limits<T>::min(), T max = std::numeric_limits<T>::
   while (true) {
     std::cin >> val;
     if (std::cin.eof()) {
-      //throw std::runtime_error("find eof");
-      //std::cout << "find eof" << std::endl;
       throw std::runtime_error("find eof");
     } 
     else if (std::cin.bad()) {
@@ -272,7 +270,7 @@ namespace matrix {
   
 } // namespace matrix
 
-int menu(){
+/*int menu(){
   int n;
   std::cout << "---------------------------------------" << std::endl;
   std::cout << "0. complete the program" << std::endl;
@@ -284,38 +282,22 @@ int menu(){
   std::cout << "---------------------------------------" << std::endl << std::endl;
   n = getNum(0, 5);
   return n;
-}
+}*/
 
 int main() {
   Matrix matrix;
-  Matrix new_matrix;
   while (true){
-    switch(menu()){
-      case 0:
-        std::cout << "ok, bue" <<std::endl;
-        matrix::erase(matrix);
-        matrix::erase(new_matrix);
-        return 0;
-      case 1:
-        matrix::erase(matrix);
-        matrix = matrix::input();
-        break;
-      case 2:
-        matrix::outputShort(matrix);
-        break;
-      case 3:
-        matrix::outputFull(matrix);
-        break;
-      case 4:
-        std::cout << "the function forms a new matrix by placing in its i-th row those elements from the i-th row of the original matrix whose entry exceeds the average number digits in the record of all elements of a given row of the matrix)" << std::endl;
-        matrix::newMatrix(matrix, compFunc);
-        break;
-      case 5:
-        std::cout << "the second function was not invented(((" << std::endl;
-        break;
-      default:
-        std::cout << "something error" << std::endl;
-        break;
-    }
+    std::cout << "enter new matrix" << std::endl;
+    matrix = matrix::input();
+    matrix::outputFull(matrix);
+    //matrix::outputShort(matrix);
+    std::cout << "form a new matrix:" << std::endl;
+    std::cout << "\t[the function forms a new matrix by\n\tplacing in its i-th row those elements from\n\tthe i-th row of the original matrix\n\twhose entry exceeds the average number\n\tdigits in the record of all\n\telements of a given row of the matrix)]" << std::endl;
+    Matrix new_matrix = matrix::newMatrix(matrix, compFunc);
+    matrix::outputFull(new_matrix);
+    matrix::erase(new_matrix);
+    matrix::erase(matrix);
+    std::cout << "are u want to continue?\nyes/no = 1/0" << std::endl;
+    if (!getNum(0,1)){ break; }
   }
 }
