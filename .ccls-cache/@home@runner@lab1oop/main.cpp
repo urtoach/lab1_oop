@@ -273,6 +273,8 @@ namespace matrix {
   
 } // namespace matrix
 
+//using namespace Lab1;
+
 int main() {
   Matrix matrix;
   Matrix new_matrix;
