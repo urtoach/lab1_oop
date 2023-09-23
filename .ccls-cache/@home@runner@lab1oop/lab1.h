@@ -56,8 +56,16 @@ T getNum(T min = std::numeric_limits<T>::min(), T max = std::numeric_limits<T>::
 }
 
 
-bool compFunc1(Matrix &matrix, Unit &unit);
-bool compFunc1(Matrix &matrix, Unit &unit)
+  bool compFunc1(Matrix &matrix, Unit &unit);
+  bool compFunc2(Matrix &matrix, Unit &unit);
+  void pushBack(Matrix &matrix, Unit *cell);
+  void erase(Matrix &matrix);
+  Unit *isExist(Matrix matrix, int x, int y);
+  void outputFull(Matrix matrix);
+  void outputShort(Matrix matrix);
+  Matrix input();
+  void checkCoord(Matrix &matrix);
+  Matrix newMatrix(Matrix &init_matrix, bool (callback(Matrix&, Unit&)));
   
 }
 
