@@ -3,6 +3,7 @@
 #include <limits>
 #include <string>
 #include <cmath>
+#include <iomanip>
 
 struct Coordinates {
   int x, y;
@@ -52,7 +53,7 @@ T getNum(T min = std::numeric_limits<T>::min(), T max = std::numeric_limits<T>::
 // количество цифр в записи которых превышает среднее количество
 // цифр в записи всех элементов данной строки матрицы
 
-bool compFunc(Matrix &matrix, Unit &unit){
+bool compFunc1(Matrix &matrix, Unit &unit){
   int count = 0;
   double sum = 0;
   Unit *ptr = matrix.head;
@@ -73,6 +74,13 @@ bool compFunc(Matrix &matrix, Unit &unit){
   else{
     return 0;
   }
+}
+
+bool compFunc2(Matrix &matrix, Unit &unit){
+  if (unit.value % 2 == unit.point.y % 2){
+    return true;
+  }
+  return false;
 }
 
 
@@ -275,11 +283,19 @@ int main() {
       //matrix::outputShort(matrix);
     
       std::cout << "form a new matrix:" << std::endl;
-      std::cout << "\t[the function forms a new matrix by\n\tplacing in its i-th row those elements from\n\tthe i-th row of the original matrix\n\twhose entry exceeds the average number\n\tdigits in the record of all\n\telements of a given row of the matrix)]" << std::endl;
+      std::cout << "\t[the function forms a new matrix by\n\tplacing in its i-th row those elements from\n\tthe i-th row of the original matrix\n\twhose entry exceeds the average number\n\tdigits in the record of all\n\telements of a given row of the matrix]" << std::endl;
     
-      Matrix new_matrix = matrix::newMatrix(matrix, compFunc);
+      Matrix new_matrix = matrix::newMatrix(matrix, compFunc1);
       matrix::outputFull(new_matrix);
       matrix::erase(new_matrix);
+
+      std::cout << "form a new matrix:" << std::endl;
+      std::cout << "\t[the function forms a new matrix by\n\tplacing in its i-th row those elements from\n\tthe i-th row of the original matrix\n\twhose parity coincides with the parity\n\tof the column in which it is located]" << std::endl;
+
+      new_matrix = matrix::newMatrix(matrix, compFunc2);
+      matrix::outputFull(new_matrix);
+      matrix::erase(new_matrix);
+      
       matrix::erase(matrix);
     
       std::cout << "are u want to continue?\nyes/no = 1/0" << std::endl;
