@@ -17,8 +17,8 @@ bool compFunc1(Matrix &matrix, Unit &unit){
     sum += (std::ceil(std::log10(std::abs(ptr->value) + 1)));
     ptr = ptr->next;
   }
-  sum += (matrix.size.x - count);
-  if (std::round(sum/matrix.size.x) < std::ceil(std::log10(std::abs(unit.value) + 1))){
+  sum += (matrix.size.y - count);
+  if (std::round(sum/matrix.size.y) < std::ceil(std::log10(std::abs(unit.value) + 1))){
     return true;
   }
   else{
@@ -32,10 +32,6 @@ bool compFunc2(Matrix &matrix, Unit &unit){
   }
   return false;
 }
-
-
-namespace matrix {
-  namespace unit {
 
     void pushBack(Matrix &matrix, Unit *cell) {
       try {
@@ -53,7 +49,7 @@ namespace matrix {
         throw;
       }
     }
-  }
+  
   void erase(Matrix &matrix) {
     try {
       Unit *ptr = matrix.head;
@@ -156,7 +152,7 @@ namespace matrix {
           }
           Unit *cell = new Unit;
           *cell = {val, {i, j}, nullptr}; 
-          unit::pushBack(matrix, cell);
+          pushBack(matrix, cell);
         }
       }
     }
@@ -208,7 +204,7 @@ namespace matrix {
         if (callback(init_matrix, *ptr)){
           Unit *cell = new Unit;
           *cell = {ptr->value, {ptr->point.x, ptr->point.y}, nullptr};
-          unit::pushBack(new_matrix, cell);
+          pushBack(new_matrix, cell);
         }
         ptr = ptr->next;
       }
@@ -221,6 +217,5 @@ namespace matrix {
     return new_matrix;
   }
   
-} // namespace matrix
+} 
   
-}

@@ -64,11 +64,11 @@ bool compFunc1(Matrix &matrix, Unit &unit){
   if (!ptr){ return false; }
   while (ptr && ptr->point.x == unit.point.x){
     count++;
-    sum += (std::ceil(std::log10(std::abs(ptr->value) + 1)));
+    sum += (std::ceil(std::log10(std::abs(ptr->value) + 1))); //функция считает количество цифр
     ptr = ptr->next;
   }
-  sum += (matrix.size.x - count);
-  if (std::round(sum/matrix.size.x) < std::ceil(std::log10(std::abs(unit.value) + 1))){
+  sum += (matrix.size.y - count);
+  if (std::round(sum/matrix.size.y) < std::ceil(std::log10(std::abs(unit.value) + 1))){
     return true;
   }
   else{
