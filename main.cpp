@@ -64,11 +64,11 @@ bool compFunc1(Matrix &matrix, Unit &unit){
   if (!ptr){ return false; }
   while (ptr && ptr->point.x == unit.point.x){
     count++;
-    sum += (std::ceil(std::log10(ptr->value + 1)));
+    sum += (std::ceil(std::log10(std::abs(ptr->value) + 1)));
     ptr = ptr->next;
   }
   sum += (matrix.size.x - count);
-  if (std::round(sum/matrix.size.x) < std::ceil(std::log10(unit.value + 1))){
+  if (std::round(sum/matrix.size.x) < std::ceil(std::log10(std::abs(unit.value) + 1))){
     return true;
   }
   else{
@@ -77,7 +77,7 @@ bool compFunc1(Matrix &matrix, Unit &unit){
 }
 
 bool compFunc2(Matrix &matrix, Unit &unit){
-  if (unit.value % 2 == unit.point.y % 2){
+  if (std::abs(unit.value) % 2 == std::abs(unit.point.y % 2)){
     return true;
   }
   return false;
@@ -200,7 +200,7 @@ namespace matrix {
         for (int j = 0; j < matrix.size.y; j++) {
           int val;
           std::cout << "enter num:" << std::endl;
-          val = getNum<int>(0);
+          val = getNum<int>();
           if (val == 0) {
             continue;
           }
